@@ -18,25 +18,29 @@ function OpenFile () {
       if (err) throw err
       if (data) {
         console.log($('#tree').jstree(true))
-        $('#tree').jstree(true).settings.core.data = JSON.parse(data)
-        $('#tree').jstree(true).refresh()
+        $('.tree').jstree(true).settings.core.data = JSON.parse(data)
+        $('.tree').jstree(true).refresh()
       }
     })
   })
 }
 
-$('#tree').jstree({
+$('.tree').jstree({
   'core': {
     'animation': 0,
     'themes': {
       'dots': false,
       'stripes': true
-    }
+    },
+    'check_callback': true
   },
   'types': {
+    '#': {
+      'valid_children': ['task']
+    },
     'task': {
       'icon': 'glyphicon glyphicon-tasks',
-      'valid_children': []
+      'valid_children': ['']
     }
   },
   'plugins': ['themes', 'contextmenu', 'dnd', 'search', 'types', 'state']
