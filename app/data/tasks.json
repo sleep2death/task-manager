@@ -1,0 +1,17 @@
+[
+  {"text": "new talk task", "type": "talk_task", "children":[
+    {"text": "起始NPC: null", "type": "npc_id", "data_type": "uint", "data": null, "children": true, "prefix": "起始NPC: "},
+    {"text": "等级限制: 1", "type": "level_limit", "data_type": "uint", "data": 1, "prefix": "等级限制: "},
+    {"text": "对话步骤", "type": "talk_steps"},
+    {"text": "前置脚本", "type": "script"},
+    {"text": "后置脚本", "type": "script"}
+  ]},
+  {"text": "new battle task", "type": "battle_task", "children":[
+    {"text": "起始NPC: null", "type": "npc_id", "data_type": "uint", "data": null, "children": true, "prefix": "起始NPC: "},
+    {"text": "等级限制: 1", "type": "level_limit", "data_type": "uint", "data": 1, "prefix": "等级限制: "},
+    {"text": "重试对话步骤", "type": "talk_steps"},
+    {"text": "战斗编号", "type": "battle_id"},
+    {"text": "前置脚本", "type": "script"},
+    {"text": "后置脚本", "type": "script"}
+  ]}
+]

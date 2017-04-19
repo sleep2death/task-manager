@@ -4,6 +4,7 @@ import './helpers/window.js'
 
 import { remote } from 'electron'
 import fs from 'fs'
+import CreateTree from './tree/jsTree'
 
 $('#open_btn').click(OpenFile)
 
@@ -14,34 +15,38 @@ function OpenFile () {
     properties: ['openFile']
   }, (file) => {
     if (file === undefined) return
+    // TODO: handle format errors here
     fs.readFile(file[0], 'utf-8', (err, data) => {
       if (err) throw err
       if (data) {
-        console.log($('#tree').jstree(true))
-        $('.tree').jstree(true).settings.core.data = JSON.parse(data)
-        $('.tree').jstree(true).refresh()
+        container.jstree(true).settings.core.data = JSON.parse(data)
+        container.jstree(true).refresh()
       }
     })
   })
 }
 
-$('.tree').jstree({
-  'core': {
-    'animation': 0,
-    'themes': {
-      'dots': false,
-      'stripes': true
-    },
-    'check_callback': true
-  },
-  'types': {
-    '#': {
-      'valid_children': ['task']
-    },
-    'task': {
-      'icon': 'glyphicon glyphicon-tasks',
-      'valid_children': ['']
+const container = $('.tree')
+CreateTree(container)
+
+container.on('select_node.jstree', (evt, data) => {
+  const node = data.node
+  if (node.parent) {
+    const parentNode = container.jstree(true).get_node(node.parent)
+    if (parentNode && parentNode.original.prefix) {
+      container.jstree(true).set_text(parentNode, parentNode.original.prefix + node.text)
+      parentNode.data = node.data
     }
-  },
-  'plugins': ['themes', 'contextmenu', 'dnd', 'search', 'types', 'state']
+  }
+})
+
+container.on('rename_node.jstree', (evt, data) => {
+  const node = data.node
+  const newData = data.text
+
+  if (node.original.prefix) {
+    container.jstree(true).set_text(node, node.original.prefix + newData)
+  } else {
+    container.jstree(true).set_text(node, newData)
+  }
 })
