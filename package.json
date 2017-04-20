@@ -33,7 +33,8 @@
     "bootstrap": "^3.3.7",
     "fs-jetpack": "^0.12.0",
     "jquery": "^3.2.1",
-    "jstree": "^3.3.4"
+    "jstree": "^3.3.4",
+    "xlsx": "^0.9.11"
   },
   "standard": {
     "esnext": true,

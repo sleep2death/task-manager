@@ -1,7 +1,7 @@
-import fs from 'fs'
+import {readExcel} from './parser'
 
-const SRC = './app/data/tasks.json'
-const NPC_SRC = './app/data/npc.json'
+const ROOT_PATH = './app/data/tasks.xlsx'
+const ROOT_SHEET = 'task'
 
 const nodeTypes = {
   '#': {
@@ -55,17 +55,10 @@ export default function CreateTree (container) {
 
 function getData (node, cb) {
   if (node.id === '#') {
-    readFile(SRC, cb)
-  } else if (node.type === 'npc_id') {
-    readFile(NPC_SRC, cb)
+    readExcel(ROOT_PATH, ROOT_SHEET, cb)
+  } else {
+    console.log(node.original.link)
   }
-}
-
-function readFile (url, cb) {
-  fs.readFile(url, 'utf-8', (err, data) => {
-    if (err) throw err
-    if (data) cb(JSON.parse(data))
-  })
 }
 
 // custom context menu items
