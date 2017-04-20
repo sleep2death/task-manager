@@ -9,7 +9,7 @@ export function readExcel (path, sheetName, cb) {
     if (name === sheetName) {
       // dealing with worksheet
       const ws = wb.Sheets[name]
-      ws.path = `${path}/${name}`
+      ws.path = path
 
       ws.name = name
 
@@ -42,16 +42,19 @@ function readSheet (ws) {
 function readData (ws, range, index) {
   const res = { link: {}, desc: {}, data: [] }
 
+  // links
   for (const key in index.link) {
     const name = index.propName[key]
     res.link[name] = index.link[key]
   }
 
+  // desc for prefix
   for (const key in index.desc) {
     const name = index.propName[key]
     res.desc[name] = index.desc[key]
   }
 
+  // items
   for (let R = range.s.r; R <= range.e.r; ++R) {
     const firstCell = xlsx.utils.encode_cell({c: range.s.c, r: R})
     const firstCellValue = ws[firstCell] ? ws[firstCell].v : null
@@ -61,30 +64,32 @@ function readData (ws, range, index) {
 
     // read the row
     const rowData = readRow(ws, range, index, R)
-    if (rowData) res.data.push(postfix(name, rowData, index))
+    if (rowData) res.data.push(postfix(ws.path, rowData, index))
   }
 
   return res
 }
 
-function postfix (name, data, index) {
-  const res = {type: name}
+function postfix (path, data, index) {
+  const res = {}
   const children = []
   for (const key in data) {
     if (key === 'text' || key === 'data') {
       res[key] = data[key]
     } else {
       const child = {}
-
-      child.type = key
       child.data = data[key]
 
-      const text = getDescFromIndex(key, index)
-      const link = getLinkFromIndex(key, index)
+      child.type = getInfoFromIndex(key, 'type', index)
 
-      if (text) child.text = text + ':' + child.data
+      const desc = getInfoFromIndex(key, 'desc', index)
+      const link = getInfoFromIndex(key, 'link', index)
+
+      child.text = desc + ':' + child.data
+
       if (link) {
-        child.link = link
+        child.link = getLink(link)
+        if (!child.link.file) child.link.file = path
         child.children = true
       }
 
@@ -93,28 +98,29 @@ function postfix (name, data, index) {
   }
 
   if (children.length > 0) res.children = children
-  console.log(children)
   return res
 }
 
-function getDescFromIndex (key, index) {
+function getInfoFromIndex (key, prop, index) {
   for (const i in index.propName) {
     if (index.propName[i] === key) {
-      return index.desc[i]
+      return index[prop][i]
     }
   }
 
   return null
 }
 
-function getLinkFromIndex (key, index) {
-  for (const i in index.propName) {
-    if (index.propName[i] === key) {
-      return index.link[i]
-    }
+function getLink (link) {
+  const l = {}
+  const arr = link.split(':')
+  if (arr.length > 1) {
+    l.file = arr[0]
+    l.sheet = arr[1]
+  } else if (arr.length === 1) {
+    l.sheet = link
   }
-
-  return null
+  return l
 }
 
 function readRow (ws, range, index, r) {

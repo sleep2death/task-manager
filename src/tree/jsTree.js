@@ -4,11 +4,14 @@ const ROOT_PATH = './app/data/tasks.xlsx'
 const ROOT_SHEET = 'task'
 
 const nodeTypes = {
+  'default': {
+    'icon': 'glyphicon glyphicon-list'
+  },
   '#': {
     'valid_children': ['task']
   },
-  'talk_task': {
-    'icon': 'glyphicon glyphicon-comment'
+  'task': {
+    'icon': 'glyphicon glyphicon-tasks'
   },
   'battle_task': {
     'icon': 'glyphicon glyphicon-fire'
@@ -57,7 +60,7 @@ function getData (node, cb) {
   if (node.id === '#') {
     readExcel(ROOT_PATH, ROOT_SHEET, cb)
   } else {
-    console.log(node.original.link)
+    console.log(node.original)
   }
 }
 
