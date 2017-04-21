@@ -4,6 +4,7 @@ export function readExcel (path, sheetName, cb) {
   // parsing xlsx
   const wb = xlsx.readFile(path)
   if (!wb) throwError(`Parsing Error: ${path}`)
+  if (!sheetName) sheetName = wb.SheetNames[0]
 
   wb.SheetNames.forEach(name => {
     if (name === sheetName) {
@@ -73,6 +74,7 @@ function readData (ws, range, index) {
 function postfix (path, data, index) {
   const res = {}
   const children = []
+
   for (const key in data) {
     if (key === 'text' || key === 'data') {
       res[key] = data[key]
@@ -80,12 +82,14 @@ function postfix (path, data, index) {
       const child = {}
       child.data = data[key]
 
-      child.type = getInfoFromIndex(key, 'type', index)
-
       const desc = getInfoFromIndex(key, 'desc', index)
       const link = getInfoFromIndex(key, 'link', index)
 
-      child.text = desc + ':' + child.data
+      child.type = link ? 'link' : getInfoFromIndex(key, 'type', index)
+
+      child.text = desc + ': ' + child.data
+
+      child.desc = desc
 
       if (link) {
         child.link = getLink(link)

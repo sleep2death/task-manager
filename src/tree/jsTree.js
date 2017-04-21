@@ -1,38 +1,17 @@
 import {readExcel} from './parser'
 
-const ROOT_PATH = './app/data/tasks.xlsx'
-const ROOT_SHEET = 'task'
-
 const nodeTypes = {
   'default': {
     'icon': 'glyphicon glyphicon-list'
   },
-  '#': {
-    'valid_children': ['task']
+  'link': {
+    'icon': 'glyphicon glyphicon-link'
   },
-  'task': {
-    'icon': 'glyphicon glyphicon-tasks'
+  'boolean': {
+    'icon': 'glyphicon glyphicon-adjust'
   },
-  'battle_task': {
-    'icon': 'glyphicon glyphicon-fire'
-  },
-  'level_limit': {
-    'icon': 'glyphicon glyphicon-chevron-up'
-  },
-  'talk_steps': {
-    'icon': 'glyphicon glyphicon-th-list'
-  },
-  'npc_id': {
-    'icon': 'glyphicon glyphicon-user'
-  },
-  'npc': {
-    'icon': 'glyphicon glyphicon-user'
-  },
-  'battle_id': {
-    'icon': 'glyphicon glyphicon-record'
-  },
-  'script': {
-    'icon': 'glyphicon glyphicon-list-alt'
+  'number': {
+    'icon': 'glyphicon glyphicon-pencil'
   }
 }
 
@@ -54,19 +33,34 @@ export default function CreateTree (container) {
     },
     plugins: ['themes', 'contextmenu', 'dnd', 'search', 'types']
   })
+
+  container.on('rename_node.jstree', (evt, data) => {
+    const node = data.node
+    const tree = $('.tree').jstree(true)
+    // TODO: validate input data
+
+    if (node.original.desc && node.type !== 'string') {
+      tree.set_text(node, node.original.desc + ': ' + data.text)
+    }
+  })
 }
 
+CreateTree.ROOT_PATH = './app/data/tasks.xlsx'
+CreateTree.ROOT_SHEET = 'task'
+
 function getData (node, cb) {
+  console.log(CreateTree.ROOT_PATH)
   if (node.id === '#') {
-    readExcel(ROOT_PATH, ROOT_SHEET, cb)
+    readExcel(CreateTree.ROOT_PATH, CreateTree.ROOT_SHEET, cb)
   } else {
-    console.log(node.original)
+    readExcel(node.original.link.file, node.original.link.sheet, cb)
   }
 }
 
 // custom context menu items
 function ContextMenuItems (node) {
   const tree = $('.tree').jstree(true)
+
   const Edit = {
     label: 'Edit',
     action: () => {
@@ -74,17 +68,27 @@ function ContextMenuItems (node) {
     }
   }
 
-  const Create = {
-    label: 'Create',
-    action: obj => {
-      tree.create_node(node, { text: 'new_node' }, 'last', newNode => {
-        tree.edit(newNode)
-      })
+  const Yes = {
+    label: 'true',
+    action: () => {
+      node.data = true
+      tree.set_text(node, node.original.desc + ': true')
     }
   }
 
-  if (node.type === 'talk_task' || node.type === 'battle_task' ||
-     node.type === 'level_limit') return {Edit}
+  const No = {
+    label: 'false',
+    action: () => {
+      node.data = false
+      tree.set_text(node, node.original.desc + ': false')
+    }
+  }
 
-  if (node.type === 'talk_steps') return {Create}
+  if (node.type === 'default' || node.type === 'number' || node.type === 'string') {
+    return {Edit}
+  }
+
+  if (node.type === 'boolean') {
+    return {Yes, No}
+  }
 }
